@@ -8,9 +8,9 @@ const LaunchType = new GraphQLObjectType({
     fields: () => ({
         flight_number: { type: GraphQLInt },
         mission_name: { type: GraphQLString },
-        launch_year_: { type: GraphQLString },
+        launch_year: { type: GraphQLString },
         launch_date_local: { type: GraphQLString },
-        lauch_success: { type: { type: GraphQLBoolean } },
+        lauch_success: { type: GraphQLBoolean },
         rocket: { type: RocketType }
     })
 });
@@ -33,9 +33,48 @@ const RootQuery = new GraphQLObjectType({
             type: new GraphQLList(LaunchType),
             async resolve(parent, args) {
                 try {
-                    const response = await axios.get('https://api.spacexdata.com/v3/launches');
-                    return response.data;
+                    const {data} = await axios.get('https://api.spacexdata.com/v3/launches');
+                    return data;
                 } catch (error) {
+                    console.log(error)
+                }
+            }
+        },
+        launch: {
+            type: LaunchType,
+            args: {
+                flight_number: { type: GraphQLString }
+            },
+            async resolve(parent, args) {
+                try {
+                    const {data} = await axios.get(`https://api.spacexdata.com/v3/launches/${args.flight_number}`);
+                    return data;
+                } catch (error) {
+                    console.log(error)
+                }
+            }
+        },
+        rockets: {
+            type: new GraphQLList(RocketType),
+            async resolve(parent, args){
+                try{
+                    const {data} = await axios.get('https://api.spacexdata.com/v3/rockets');
+                    return data;
+                }catch(error){
+                    console.log(error);
+                }
+            }
+        },
+        rocket: {
+            type: RocketType,
+            args:{
+                rocket_id: {type: GraphQLString}
+            },
+            async resolve(parent, args){
+                try{
+                    const {data} = await axios.get(`https://api.spacexdata.com/v3/rockets/${args.rocket_id}`);
+                    return data;
+                }catch(error){
                     console.log(error)
                 }
             }
